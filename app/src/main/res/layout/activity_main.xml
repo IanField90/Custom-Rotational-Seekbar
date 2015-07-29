@@ -12,10 +12,14 @@
     <com.ianfield.customviewexample.views.RotationalSeekView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:id="@+id/rotationalSeek"
         custom:showLengthText="true"
         custom:showProgressText="true"
         custom:labelPosition="center"
-        custom:progressColor="#CC00CC"
+        custom:currentProgress="10"
+        custom:maxProgress="150"
+        custom:trackColor="#E8A40C"
+        custom:progressColor="#00ffCC"
         />
 
 </RelativeLayout>

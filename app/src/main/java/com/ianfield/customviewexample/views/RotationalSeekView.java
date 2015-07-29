@@ -20,7 +20,6 @@ public class RotationalSeekView extends View {
     // Internal
     Paint mTextPaint;
     Paint mSeekbarPaint;
-    Paint mSeekbarBackgroundPaint;
 
     private static int TEXTPOS_LEFT = 0;
     private static int TEXTPOS_RIGHT = 1;
@@ -28,18 +27,16 @@ public class RotationalSeekView extends View {
 
     private RectF mSeekBounds = new RectF();
 
-
-
     // Exposed
-//    String maxProgress = "10:51";
-//    String currentProgress = "4:32";
-
-    private int mCurrentProgress = 32;
+    private int mCurrentProgress = 0;
     private int mMaxProgress = 100;
     // Default center
-    private int mTextPos = 2;
+    private int mTextPos = TEXTPOS_CENTER;
     private boolean mShowProgressText = true;
     private boolean mShowLengthText = true;
+
+    private int mProgressColor = 0xffff00ff;
+    private int mTrackColor = 0x33cccccc;
 
     public RotationalSeekView(Context context) {
         super(context);
@@ -57,6 +54,10 @@ public class RotationalSeekView extends View {
         try {
             mShowProgressText = a.getBoolean(R.styleable.RotationalSeekView_showProgressText, false);
             mTextPos = a.getInteger(R.styleable.RotationalSeekView_labelPosition, 2);
+            mProgressColor = a.getColor(R.styleable.RotationalSeekView_progressColor, 0xffff00ff);
+            mTrackColor = a.getColor(R.styleable.RotationalSeekView_trackColor, 0x33cccccc);
+            mCurrentProgress = a.getInteger(R.styleable.RotationalSeekView_currentProgress, 0);
+            mMaxProgress = a.getInteger(R.styleable.RotationalSeekView_maxProgress, 100);
         } finally {
             a.recycle();
         }
@@ -83,9 +84,11 @@ public class RotationalSeekView extends View {
     }
 
     public void setCurrentProgress(int currentProgress) {
-        this.mCurrentProgress = currentProgress;
-        invalidate();
-        requestLayout();
+        if (currentProgress <= mMaxProgress) {
+            this.mCurrentProgress = currentProgress;
+            invalidate();
+            requestLayout();
+        }
     }
 
     public int getMaxProgress() {
@@ -132,23 +135,45 @@ public class RotationalSeekView extends View {
         super.onDraw(canvas);
 
         // track
-        mSeekbarPaint.setColor(0x33cccccc);
-        mSeekbarPaint.setStrokeWidth(dpToPx(10));
+        mSeekbarPaint.setColor(mTrackColor);
         canvas.drawArc(mSeekBounds, 0, 360, false, mSeekbarPaint);
 
-        mSeekbarPaint.setColor(0xffff00ff);
-        mSeekbarPaint.setStrokeWidth(dpToPx(10));
+        mSeekbarPaint.setColor(mProgressColor);
         canvas.drawArc(mSeekBounds, -90, (360 * ((float) mCurrentProgress / (float) mMaxProgress)), false, mSeekbarPaint);
 
-        if (mTextPos == TEXTPOS_CENTER) {
-            RectF bounds = new RectF(mSeekBounds);
-            // measure text width
-            bounds.right = mTextPaint.measureText("Hello", 0, "Hello".length());
-            // measure text height
-            bounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
-            bounds.left += (mSeekBounds.width() - bounds.right) / 2.0f;
-            bounds.top += (mSeekBounds.height() - bounds.bottom) / 2.0f;
-            canvas.drawText("Hello", bounds.left, bounds.top - mTextPaint.ascent(), mTextPaint);
+        if (mShowProgressText) {
+            String progressText = getProgressAsTime();
+            if (mTextPos == TEXTPOS_CENTER) {
+                // TODO Can probably init this and update onSizeChanged
+                RectF bounds = new RectF(mSeekBounds);
+                // measure text width
+                bounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
+                // measure text height
+                bounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
+                bounds.left += (mSeekBounds.width() - bounds.right) / 2.0f;
+                bounds.top += (mSeekBounds.height() - bounds.bottom) / 2.0f;
+                canvas.drawText(progressText, bounds.left, bounds.top - mTextPaint.ascent(), mTextPaint);
+            } else if (mTextPos == TEXTPOS_LEFT) {
+                // TODO Can probably init this and update onSizeChanged
+                RectF bounds = new RectF(mSeekBounds);
+                // measure text width
+                bounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
+                // measure text height
+                bounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
+                bounds.left += dpToPx(10);
+                bounds.top += (mSeekBounds.height() - bounds.bottom) / 2.0f;
+                canvas.drawText(progressText, bounds.left, bounds.top - mTextPaint.ascent(), mTextPaint);
+            } else if (mTextPos == TEXTPOS_RIGHT) {
+                // TODO Can probably init this and update onSizeChanged
+                RectF bounds = new RectF(mSeekBounds);
+                // measure text width
+                bounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
+                // measure text height
+                bounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
+                bounds.left += (mSeekBounds.width() - bounds.right) - dpToPx(10);
+                bounds.top += (mSeekBounds.height() - bounds.bottom) / 2.0f;
+                canvas.drawText(progressText, bounds.left, bounds.top - mTextPaint.ascent(), mTextPaint);
+            }
         }
     }
 
@@ -172,61 +197,14 @@ public class RotationalSeekView extends View {
         // Figure out how big we can make the pie.
         float diameter = Math.min(ww, hh);
         // Adjust for width of the paint stroke
-//        diameter -= dpToPx(10);
         mSeekBounds = new RectF(
                 0f,
                 0f,
                 diameter,
                 diameter);
         mSeekBounds.offsetTo(getPaddingLeft(), getPaddingTop());
+        // Prevent top left and right clipping
         mSeekBounds.inset(dpToPx(10), dpToPx(10));
-
-
-//        setPivot(mSeekBounds.width() / 2, mSeekBounds.height() / 2);
-
-//        mPointerY = mTextY - (mTextHeight / 2.0f);
-//        float pointerOffset = mPieBounds.centerY() - mPointerY;
-//
-//        // Make adjustments based on text position
-//        if (mTextPos == TEXTPOS_LEFT) {
-//            mTextPaint.setTextAlign(Paint.Align.RIGHT);
-//            if (mShowText) mPieBounds.offset(mTextWidth, 0.0f);
-//            mTextX = mPieBounds.left;
-//
-//            if (pointerOffset < 0) {
-//                pointerOffset = -pointerOffset;
-//                mCurrentItemAngle = 225;
-//            } else {
-//                mCurrentItemAngle = 135;
-//            }
-//            mPointerX = mPieBounds.centerX() - pointerOffset;
-//        } else {
-//            mTextPaint.setTextAlign(Paint.Align.LEFT);
-//            mTextX = mPieBounds.right;
-//
-//            if (pointerOffset < 0) {
-//                pointerOffset = -pointerOffset;
-//                mCurrentItemAngle = 315;
-//            } else {
-//                mCurrentItemAngle = 45;
-//            }
-//            mPointerX = mPieBounds.centerX() + pointerOffset;
-//        }
-//
-//        mShadowBounds = new RectF(
-//                mPieBounds.left + 10,
-//                mPieBounds.bottom + 10,
-//                mPieBounds.right - 10,
-//                mPieBounds.bottom + 20);
-//
-//        // Lay out the child view that actually draws the pie.
-//        mPieView.layout((int) mPieBounds.left,
-//                (int) mPieBounds.top,
-//                (int) mPieBounds.right,
-//                (int) mPieBounds.bottom);
-//        mPieView.setPivot(mPieBounds.width() / 2, mPieBounds.height() / 2);
-//
-//        mPointerView.layout(0, 0, w, h);
     }
 
 
@@ -246,5 +224,8 @@ public class RotationalSeekView extends View {
         return (int) (dp * this.getContext().getResources().getDisplayMetrics().density + 0.5f);
     }
 
+    private String getProgressAsTime() {
+        return String.format("%d/%d", mCurrentProgress, mMaxProgress);
+    }
 
 }
