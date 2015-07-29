@@ -26,6 +26,9 @@ public class RotationalSeekView extends View {
     private static int TEXTPOS_CENTER = 2;
 
     private RectF mSeekBounds = new RectF();
+    private RectF mRightTextBounds = new RectF();
+    private RectF mLeftTextBounds = new RectF();
+    private RectF mCenterTextBounds = new RectF();
 
     // Exposed
     private int mCurrentProgress = 0;
@@ -144,35 +147,29 @@ public class RotationalSeekView extends View {
         if (mShowProgressText) {
             String progressText = getProgressAsTime();
             if (mTextPos == TEXTPOS_CENTER) {
-                // TODO Can probably init this and update onSizeChanged
-                RectF bounds = new RectF(mSeekBounds);
                 // measure text width
-                bounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
+                mCenterTextBounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
                 // measure text height
-                bounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
-                bounds.left += (mSeekBounds.width() - bounds.right) / 2.0f;
-                bounds.top += (mSeekBounds.height() - bounds.bottom) / 2.0f;
-                canvas.drawText(progressText, bounds.left, bounds.top - mTextPaint.ascent(), mTextPaint);
+                mCenterTextBounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
+                mCenterTextBounds.left += (mSeekBounds.width() - mCenterTextBounds.right) / 2.0f;
+                mCenterTextBounds.top += (mSeekBounds.height() - mCenterTextBounds.bottom) / 2.0f;
+                canvas.drawText(progressText, mCenterTextBounds.left, mCenterTextBounds.top - mTextPaint.ascent(), mTextPaint);
             } else if (mTextPos == TEXTPOS_LEFT) {
-                // TODO Can probably init this and update onSizeChanged
-                RectF bounds = new RectF(mSeekBounds);
                 // measure text width
-                bounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
+                mLeftTextBounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
                 // measure text height
-                bounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
-                bounds.left += dpToPx(10);
-                bounds.top += (mSeekBounds.height() - bounds.bottom) / 2.0f;
-                canvas.drawText(progressText, bounds.left, bounds.top - mTextPaint.ascent(), mTextPaint);
+                mLeftTextBounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
+                mLeftTextBounds.left += dpToPx(10);
+                mLeftTextBounds.top += (mSeekBounds.height() - mLeftTextBounds.bottom) / 2.0f;
+                canvas.drawText(progressText, mLeftTextBounds.left, mLeftTextBounds.top - mTextPaint.ascent(), mTextPaint);
             } else if (mTextPos == TEXTPOS_RIGHT) {
-                // TODO Can probably init this and update onSizeChanged
-                RectF bounds = new RectF(mSeekBounds);
                 // measure text width
-                bounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
+                mRightTextBounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
                 // measure text height
-                bounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
-                bounds.left += (mSeekBounds.width() - bounds.right) - dpToPx(10);
-                bounds.top += (mSeekBounds.height() - bounds.bottom) / 2.0f;
-                canvas.drawText(progressText, bounds.left, bounds.top - mTextPaint.ascent(), mTextPaint);
+                mRightTextBounds.bottom = mTextPaint.descent() - mTextPaint.ascent();
+                mRightTextBounds.left += (mSeekBounds.width() - mRightTextBounds.right) - dpToPx(10);
+                mRightTextBounds.top += (mSeekBounds.height() - mRightTextBounds.bottom) / 2.0f;
+                canvas.drawText(progressText, mRightTextBounds.left, mRightTextBounds.top - mTextPaint.ascent(), mTextPaint);
             }
         }
     }
@@ -205,6 +202,10 @@ public class RotationalSeekView extends View {
         mSeekBounds.offsetTo(getPaddingLeft(), getPaddingTop());
         // Prevent top left and right clipping
         mSeekBounds.inset(dpToPx(10), dpToPx(10));
+
+        mRightTextBounds = new RectF(mSeekBounds);
+        mLeftTextBounds = new RectF(mSeekBounds);
+        mCenterTextBounds = new RectF(mSeekBounds);
     }
 
 

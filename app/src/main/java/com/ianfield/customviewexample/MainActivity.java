@@ -18,6 +18,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
+        handler.removeCallbacks(increaseProgress);
         handler.postDelayed(increaseProgress, 1000);
     }
 

@@ -16,9 +16,9 @@
         android:id="@+id/rotationalSeek"
         custom:showLengthText="true"
         custom:showProgressText="true"
-        custom:labelPosition="center"
-        custom:currentProgress="10"
-        custom:maxProgress="150"
+        custom:labelPosition="right"
+        custom:currentProgress="1"
+        custom:maxProgress="60"
         custom:trackColor="#ccfdc01a"
         custom:progressColor="#aa1f67"
         />
