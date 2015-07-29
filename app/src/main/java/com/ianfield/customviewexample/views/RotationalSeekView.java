@@ -122,7 +122,7 @@ public class RotationalSeekView extends View {
     private void init() {
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(Color.WHITE);
-        mTextPaint.setTextSize(40f);
+        mTextPaint.setTextSize(dpToPx(20));
 
         mSeekbarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mSeekbarPaint.setColor(0xffff00ff);
