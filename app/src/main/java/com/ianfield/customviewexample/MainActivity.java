@@ -30,9 +30,7 @@ public class MainActivity extends ActionBarActivity {
         increaseProgress = new Runnable() {
             @Override
             public void run() {
-                if (seekView != null) {
-                    seekView.setCurrentProgress(seekView.getCurrentProgress() + 1);
-                }
+                seekView.setCurrentProgress(seekView.getCurrentProgress() + 1);
                 handler.postDelayed(increaseProgress, 1000);
             }
         };
