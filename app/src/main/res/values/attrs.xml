@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RotationalSeekView">
+        <attr name="showLengthText" format="boolean" />
+        <attr name="showProgressText" format="boolean" />
+        <attr name="labelPosition" format="enum">
+            <enum name="left" value="0"/>
+            <enum name="right" value="1"/>
+            <enum name="center" value="2"/>
+        </attr>
+        <attr name="progressColor" format="color" />
+        <attr name="trackColor" format="color" />
+        <attr name="maxProgress" format="integer" />
+        <attr name="currentProgress" format="integer"/>
+    </declare-styleable>
+</resources>
