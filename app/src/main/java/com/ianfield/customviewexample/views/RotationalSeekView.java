@@ -8,7 +8,9 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.TypedValue;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.ianfield.customviewexample.R;
@@ -132,6 +134,10 @@ public class RotationalSeekView extends View {
         mSeekbarPaint.setStyle(Paint.Style.STROKE);
         mSeekbarPaint.setStrokeWidth(dpToPx(10));
         mSeekbarPaint.setStrokeCap(Paint.Cap.ROUND);
+        mSeekbarPaint.setFilterBitmap(true);
+        mSeekbarPaint.setAntiAlias(true);
+        mSeekbarPaint.setDither(true);
+//        mSeekbarPaint.setXfermode(Xfermode)
     }
 
     protected void onDraw(Canvas canvas) {
@@ -139,14 +145,19 @@ public class RotationalSeekView extends View {
 
         // track
         mSeekbarPaint.setColor(mTrackColor);
+        mSeekbarPaint.setStrokeWidth(dpToPx(14));
+        // Draw the track as a full circle
         canvas.drawArc(mSeekBounds, 0, 360, false, mSeekbarPaint);
+//        canvas.drawCircle(mSeekBounds.centerX(), mSeekBounds.centerY(), mSeekBounds.width()/2, mSeekbarPaint);
 
+        mSeekbarPaint.setStrokeWidth(dpToPx(14));
         mSeekbarPaint.setColor(mProgressColor);
         canvas.drawArc(mSeekBounds, -90, (360 * ((float) mCurrentProgress / (float) mMaxProgress)), false, mSeekbarPaint);
 
         if (mShowProgressText) {
             String progressText = getProgressAsTime();
             if (mTextPos == TEXTPOS_CENTER) {
+                mCenterTextBounds = new RectF(mSeekBounds);
                 // measure text width
                 mCenterTextBounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
                 // measure text height
@@ -155,6 +166,7 @@ public class RotationalSeekView extends View {
                 mCenterTextBounds.top += (mSeekBounds.height() - mCenterTextBounds.bottom) / 2.0f;
                 canvas.drawText(progressText, mCenterTextBounds.left, mCenterTextBounds.top - mTextPaint.ascent(), mTextPaint);
             } else if (mTextPos == TEXTPOS_LEFT) {
+                mLeftTextBounds = new RectF(mSeekBounds);
                 // measure text width
                 mLeftTextBounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
                 // measure text height
@@ -163,6 +175,7 @@ public class RotationalSeekView extends View {
                 mLeftTextBounds.top += (mSeekBounds.height() - mLeftTextBounds.bottom) / 2.0f;
                 canvas.drawText(progressText, mLeftTextBounds.left, mLeftTextBounds.top - mTextPaint.ascent(), mTextPaint);
             } else if (mTextPos == TEXTPOS_RIGHT) {
+                mRightTextBounds = new RectF(mSeekBounds);
                 // measure text width
                 mRightTextBounds.right = mTextPaint.measureText(progressText, 0, progressText.length());
                 // measure text height
@@ -184,9 +197,6 @@ public class RotationalSeekView extends View {
         // Account for padding
         float xpad = (float) (getPaddingLeft() + getPaddingRight());
         float ypad = (float) (getPaddingTop() + getPaddingBottom());
-
-        // Account for the label
-//        if (mShowText) xpad += mTextWidth;
 
         float ww = (float) w - xpad;
         float hh = (float) h - ypad;
@@ -229,4 +239,40 @@ public class RotationalSeekView extends View {
         return String.format("%d/%d", mCurrentProgress, mMaxProgress);
     }
 
+    class GestureDetectorListener extends GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
+            e.getPointerCoords(0, coords);
+            Log.d("Coords", "(" + coords.getAxisValue(MotionEvent.AXIS_X) + ", " + coords.getAxisValue(MotionEvent.AXIS_Y) + ")");
+            Log.d("Coords", "Is inside view bounds? " + mSeekBounds.contains(coords.getAxisValue(MotionEvent.AXIS_X), coords.getAxisValue(MotionEvent.AXIS_Y)));
+            return true;
+        }
+
+
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+//            S = R * Theta
+
+            MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
+            e2.getPointerCoords(0, coords);
+            Log.d("Coords", "(" + coords.getAxisValue(MotionEvent.AXIS_X) + ", " + coords.getAxisValue(MotionEvent.AXIS_Y) + ")");
+
+
+            return super.onScroll(e1, e2, distanceX, distanceY);
+        }
+
+
+    };
+
+    private GestureDetector mGestureDetector = new GestureDetector(this.getContext(), new GestureDetectorListener());
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        mGestureDetector.onTouchEvent(event);
+
+        return super.onTouchEvent(event);
+    }
 }
